@@ -1,5 +1,4 @@
 var keypress = require('keypress');
-var charm = require('charm')();
 var colors = require('colors');
 
 var util = require('util');
