@@ -16,6 +16,7 @@ options: {
   ];
   header?: string;
   onQuit?: () => void;
+  promisify: boolean;
   startIndex?: number;
 }
  */
@@ -38,9 +39,6 @@ function Menu(options) {
 }
 
 Menu.prototype._init = function () {
-  charm.pipe(process.stdout);
-  charm.removeAllListeners('^C');
-
   keypress(process.stdin);
   process.stdin.setRawMode(true);
   process.stdin.resume();
