@@ -1,6 +1,6 @@
 {
   "name": "terminal-item-menu",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A simple, searchable menu for the terminal",
   "keywords": ["menu", "search", "searchable", "terminal", "list"],
   "main": "index.js",

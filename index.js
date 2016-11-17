@@ -122,33 +122,43 @@ Menu.prototype._draw = function () {
 Menu.prototype._initListeners = function () {
   var self = this;
   process.stdin.on('keypress', function (ch, key) {
-    if (key.name === 'up') {
+
+    var keyChar = (key && key.name) || ch;
+    if (key && key.shift) {
+      keyChar = keyChar.toUpperCase();
+    }
+    
+    if (!keyChar || !keyChar.length) {
+      return;
+    }
+    
+    if (keyChar === 'up') {
       if (!self._searching) {
         self._onUp();
       }
-    } else if (key.name === 'down') {
+    } else if (keyChar === 'down') {
       if (!self._searching) {
         self._onDown();
       }
-    } else if (key.name === 'return') {
+    } else if (keyChar === 'return') {
       self._onEnter();
-    } else if (key.name === 'escape' || (key.name === 'c' && key.ctrl)) {
+    } else if (keyChar === 'escape' || (keyChar === 'c' && key && key.ctrl)) {
       if (self._searching) {
         self._toggleSearch();
       } else {
         self._onQuit();
       }
-    } else if (key.name === 's' && key.ctrl || key.name === 'r' && key.ctrl) {
+    } else if (key && key.ctrl && (keyChar === 's'|| keyChar === 'r')) {
       if (self._searching) {
         self._onSearchAgain();
       } else {
         self._toggleSearch();
       }
-    } else if (/^[a-z]$/.test(key.name) || key.name === 'space') {
+    } else if ((keyChar.length === 1 || keyChar === 'space') && !(key && (key.meta || key.ctrl))) {
       if (self._searching) {
-        self._onSearchLetter(key.name !== 'space' ? key.name : ' ');
+        self._onSearchLetter(keyChar !== 'space' ? keyChar : ' ');
       }
-    } else if (key.name === 'backspace') {
+    } else if (keyChar === 'backspace') {
       if (self._searching) {
         self._onBackspace();
       }
