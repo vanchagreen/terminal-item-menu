@@ -1,0 +1,19 @@
+{
+  "name": "terminal-item-menu",
+  "version": "0.0.2",
+  "description": "A simple, searchable menu for the terminal",
+  "keywords": ["menu", "search", "searchable", "terminal", "list"],
+  "main": "index.js",
+  "author": "Richard Green",
+  "bugs": "https://github.com/vanchagreen/terminal-item-menu.git",
+  "repository": {
+    "type": "git",
+    "url" : "https://github.com/vanchagreen/terminal-item-menu.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "charm": "^1.0.1",
+    "colors": "^1.1.2",
+    "keypress": "^0.2.1"
+  }
+}
