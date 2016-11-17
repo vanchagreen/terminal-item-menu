@@ -34,6 +34,7 @@ function Menu(options) {
   this._searching = false;
   this._searchText = '';
   this._searchItem = null;
+  this._oldSearchItem = null;
 
   this._init();
 }
@@ -77,7 +78,6 @@ Menu.prototype._draw = function () {
 
   if (!this._searching) {
     var itemText = this.items[this.index].text;
-    
     var arrow = '';
 
     if (this.index === this.items.length - 1) {
@@ -97,11 +97,11 @@ Menu.prototype._draw = function () {
     if (this._searchItem) {
       var searchItemText = this._searchItem.text;
       var index = searchItemText.indexOf(this._searchText);
-      itemText = searchItemText.substr(0, index) + 
-                 this._searchText.underline + 
-                 searchItemText.substr(index + this._searchText.length)
+      itemText = searchItemText.substr(0, index) +
+        this._searchText.underline +
+        searchItemText.substr(index + this._searchText.length)
     } else {
-      itemText = this.items[this.index].text;
+      itemText = this._oldSearchItem.text;
     }
     process.stdout.write(itemText + '\n');
     process.stdout.write(preText + this._searchText + '_');
@@ -127,11 +127,11 @@ Menu.prototype._initListeners = function () {
     if (key && key.shift) {
       keyChar = keyChar.toUpperCase();
     }
-    
+
     if (!keyChar || !keyChar.length) {
       return;
     }
-    
+
     if (keyChar === 'up') {
       if (!self._searching) {
         self._onUp();
@@ -148,7 +148,7 @@ Menu.prototype._initListeners = function () {
       } else {
         self._onQuit();
       }
-    } else if (key && key.ctrl && (keyChar === 's'|| keyChar === 'r')) {
+    } else if (key && key.ctrl && (keyChar === 's' || keyChar === 'r')) {
       if (self._searching) {
         self._onSearchAgain();
       } else {
@@ -169,6 +169,8 @@ Menu.prototype._initListeners = function () {
 Menu.prototype._toggleSearch = function () {
   this._searching = !this._searching;
   this._searchText = '';
+  this._searchItem = null;
+  this._oldSearchItem = this.items[this.index];
   this._draw();
 }
 
@@ -182,6 +184,9 @@ function searchItems(items, searchText, oldItem) {
 
 Menu.prototype._onSearchLetter = function (c) {
   this._searchText += c;
+  if (this._searchItem) {
+    this._oldSearchItem = this._searchItem;
+  }
   this._searchItem = searchItems(this.items, this._searchText, null)
   this._draw();
 }
@@ -193,6 +198,10 @@ Menu.prototype._onBackspace = function (c) {
 }
 
 Menu.prototype._onSearchAgain = function () {
+  if (this._searchItem) {
+    this._oldSearchItem = this._searchItem;
+  }
+
   this._searchItem = searchItems(this.items, this._searchText, this._searchItem)
   this._draw();
 }
@@ -214,14 +223,19 @@ Menu.prototype._onDown = function () {
 }
 
 Menu.prototype._onEnter = function () {
-  var selectedItem = this._searching ? this._searchItem : this.items[this.index];
+  var selectedItem;
+  if (this._searching) {
+    selectedItem = this._searchItem || this._oldSearchItem;
+  } else {
+    selectedItem = this.items[this.index];
+  }
 
   process.stdout.write('\n');
-  if (item.onSelect) {
-    item.onSelect(item.value);
+  if (selectedItem.onSelect) {
+    selectedItem.onSelect(selectedItem.value);
   }
   if (this.promisify) {
-    this.emit('resolve', item.value);
+    this.emit('resolve', selectedItem.value);
   }
   this._onExit();
 }
