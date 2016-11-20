@@ -1,4 +1,3 @@
-var keypress = require('keypress');
 var colors = require('colors');
 
 var util = require('util');
@@ -40,15 +39,14 @@ function Menu(options) {
 }
 
 Menu.prototype._init = function () {
-  keypress(process.stdin);
-  process.stdin.setRawMode(true);
+  readline.emitKeypressEvents(process.stdin);
   process.stdin.resume();
+  process.stdin.setRawMode(true);
 
   this._initListeners();
 }
 
 Menu.prototype.start = function () {
-
   if (this.header) {
     var dividerLength = Math.max.apply(null, this.items.map(item => item.text.length)) + 2;
     var divider = Array(dividerLength + 1).join('-');
@@ -122,7 +120,6 @@ Menu.prototype._draw = function () {
 Menu.prototype._initListeners = function () {
   var self = this;
   process.stdin.on('keypress', function (ch, key) {
-
     var keyChar = (key && key.name) || ch;
     if (key && key.shift) {
       keyChar = keyChar.toUpperCase();
@@ -241,7 +238,8 @@ Menu.prototype._onEnter = function () {
 }
 
 Menu.prototype._onExit = function () {
-  this._cleanKeypress();
+  process.stdin.removeAllListeners('keypress');
+  process.stdin.pause();
 }
 
 Menu.prototype._onQuit = function () {
@@ -254,10 +252,6 @@ Menu.prototype._onQuit = function () {
 }
 
 //TODO: think about multiple menus...
-
-Menu.prototype._cleanKeypress = function () {
-  process.stdin.pause();
-}
 
 util.inherits(Menu, EventEmitter);
 

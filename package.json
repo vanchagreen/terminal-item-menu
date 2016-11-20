@@ -12,7 +12,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "^1.1.2",
-    "keypress": "^0.2.1"
+    "colors": "^1.1.2"
   }
 }
