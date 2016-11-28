@@ -49,9 +49,9 @@ startIndex | number | 0 | The index within the item list of the initially displa
 
 Property | Type | Default | Description | Required
 --- |--- | --- |--- | ---
-onSelect | function | *null* | A function that gets called when the item is selected | 
+onSelect | function: (selectedValue) => void | *null* | A function that gets called when the item is selected | 
 text | string | **MenuItem**.value | The text to be displayed for the item |
-value | function | *null* | The value that gets reported when the item is selected. Is the default displayed text, if the text option is null.  | ✓
+value | function | N/A | The value that gets reported when the item is selected. Is the default displayed text, if the text option is null.  | ✓
 
 ####Menu Instance Properties
 
