@@ -32,7 +32,7 @@ var pokeMenu = new Menu({
 pokeMenu.start().then(val => console.log('You chose ' + val));
 ```
 
-Insert gif here
+![](https://github.com/vanchagreen/terminal-item-menu/blob/master/menu.gif)
 
 ##Docs
 
