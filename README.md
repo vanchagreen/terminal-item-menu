@@ -1,8 +1,9 @@
 # terminal-item-menu
-A simple, searchable menu for the terminal
+A simple, searchable menu for the terminal.
 
-Here's an example:
+![](https://raw.githubusercontent.com/vanchagreen/terminal-item-menu/master/menu.gif)
 
+Here's the code for the above gif:
 
 ```javascript
 var Menu = require('terminal-item-menu');
@@ -31,9 +32,6 @@ var pokeMenu = new Menu({
 
 pokeMenu.start().then(val => console.log('You chose ' + val));
 ```
-
-![](https://github.com/vanchagreen/terminal-item-menu/blob/master/menu.gif)
-
 ##Docs
 
 ####Menu Options
