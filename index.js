@@ -15,7 +15,6 @@ options: {
   ];
   header?: string;
   onQuit?: () => void;
-  promisify: boolean;
   startIndex?: number;
 }
  */
@@ -23,11 +22,15 @@ options: {
 function Menu(options) {
   EventEmitter.call(this);
 
-  this.items = options.items;
+  this.items = options.items.map(function (item) {
+    return Object.assign({ text: item.value }, item);
+  });
+
   this.index = options.startIndex || 0;
 
+  this.caseInsensitive = options.caseInsensitive;
+  this.userOnExit = options.onExit;
   this.userOnQuit = options.onQuit;
-  this.promisify = options.promisify;
   this.header = options.header;
 
   this._searching = false;
@@ -55,18 +58,16 @@ Menu.prototype.start = function () {
 
   this._draw();
 
-  if (this.promisify) {
-    var self = this;
-    return new Promise(function (resolve, reject) {
-      self.on('resolve', function (value) {
-        resolve(value);
-      });
+  var self = this;
+  return new Promise(function (resolve, reject) {
+    self.on('resolve', function (value) {
+      resolve(value);
+    });
 
-      self.on('reject', function () {
-        reject();
-      });
-    })
-  }
+    self.on('reject', function () {
+      reject();
+    });
+  })
 }
 
 Menu.prototype._draw = function () {
@@ -94,9 +95,16 @@ Menu.prototype._draw = function () {
 
     if (this._searchItem) {
       var searchItemText = this._searchItem.text;
-      var index = searchItemText.indexOf(this._searchText);
+      var index;
+
+      if (this.caseInsensitive) {
+        index = searchItemText.toUpperCase().indexOf(this._searchText.toUpperCase());
+      } else {
+        index = searchItemText.indexOf(this._searchText);
+      }
+
       itemText = searchItemText.substr(0, index) +
-        this._searchText.underline +
+        searchItemText.substr(index, this._searchText.length).underline + 
         searchItemText.substr(index + this._searchText.length)
     } else {
       itemText = this._oldSearchItem.text;
@@ -171,10 +179,17 @@ Menu.prototype._toggleSearch = function () {
   this._draw();
 }
 
-function searchItems(items, searchText, oldItem) {
-  const foundItem = items.find(function (item) {
-    return item.text.indexOf(searchText) !== -1 && item !== oldItem;
-  });
+function searchItems(items, searchText, oldItem, caseInsensitive) {
+  let foundItem;
+  if (caseInsensitive) {
+    foundItem = items.find(item => {
+      return item.text.toUpperCase().indexOf(searchText.toUpperCase()) !== -1 && item !== oldItem;
+    })
+  } else {
+    foundItem = items.find(item => {
+      return item.text.indexOf(searchText) !== -1 && item !== oldItem;
+    })
+  }
 
   return foundItem ? foundItem : oldItem;
 }
@@ -184,13 +199,13 @@ Menu.prototype._onSearchLetter = function (c) {
   if (this._searchItem) {
     this._oldSearchItem = this._searchItem;
   }
-  this._searchItem = searchItems(this.items, this._searchText, null)
+  this._searchItem = searchItems(this.items, this._searchText, null, this.caseInsensitive)
   this._draw();
 }
 
 Menu.prototype._onBackspace = function (c) {
   this._searchText = this._searchText.slice(0, -1);
-  this._searchItem = searchItems(this.items, this._searchText, null)
+  this._searchItem = searchItems(this.items, this._searchText, null, this.caseInsensitive)
   this._draw();
 }
 
@@ -199,7 +214,7 @@ Menu.prototype._onSearchAgain = function () {
     this._oldSearchItem = this._searchItem;
   }
 
-  this._searchItem = searchItems(this.items, this._searchText, this._searchItem)
+  this._searchItem = searchItems(this.items, this._searchText, this._searchItem, this.caseInsensitive)
   this._draw();
 }
 
@@ -231,15 +246,17 @@ Menu.prototype._onEnter = function () {
   if (selectedItem.onSelect) {
     selectedItem.onSelect(selectedItem.value);
   }
-  if (this.promisify) {
-    this.emit('resolve', selectedItem.value);
-  }
+  this.emit('resolve', selectedItem.value);
   this._onExit();
 }
 
 Menu.prototype._onExit = function () {
   process.stdin.removeAllListeners('keypress');
+  process.stdout.write('\n');
   process.stdin.pause();
+  if (this.userOnExit) {
+    this.userOnExit();
+  }
 }
 
 Menu.prototype._onQuit = function () {
